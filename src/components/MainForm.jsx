@@ -1,17 +1,13 @@
 // MainForm.jsx
 import React, { Component } from 'react';
 import SpecDetails from './SpecDetails';
+import QueryDetails from './QueryDetails';
 import Success from './Success';
 
 class MainForm extends Component {
     state = {
         step: 1,
-        firstName: '',
-        lastName: '',
-        email: '',
-        age: '',
-        city: '',
-        country: ''
+        designNumber: '',
     }
 
     nextStep = () => {
@@ -34,8 +30,8 @@ class MainForm extends Component {
 
     render(){
         const {step} = this.state;
-        const { firstName, lastName, email, age, city, country } = this.state;
-        const values = { firstName, lastName, email, age, city, country };
+        const { designNumber } = this.state;
+        const values = { designNumber };
         switch(step) {
         case 1:
             return <SpecDetails
@@ -44,6 +40,13 @@ class MainForm extends Component {
                     values={values}
                     />
         case 2:
+            return <QueryDetails
+                    nextStep={this.nextStep}
+                    prevStep={this.prevStep}
+                    handleChange = {this.handleChange}
+                    values={values}
+                    />
+        case 3:
             return <Success />
         }
     }
