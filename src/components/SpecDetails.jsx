@@ -1,6 +1,6 @@
 // UserDetails.jsx
 import React, { Component } from 'react';
-import { Form, Button, Dropdown, Label } from 'semantic-ui-react';
+import { Form, Button, Dropdown, Label, Image } from 'semantic-ui-react';
 import { db } from "../firebase";
 
 import DatePicker from "react-datepicker";
@@ -172,16 +172,22 @@ class QueryDetails extends Component{
 
     _exportPdf = () => {
 
-        html2canvas(document.querySelector("#capture")).then(canvas => {
-            // document.body.appendChild(canvas);  // if you want see your screenshot in body.
-            const imgData = canvas.toDataURL('image/png');
-            // src: https://stackoverflow.com/questions/36472094/how-to-set-image-to-fit-width-of-the-page-using-jspdf
-            const pdf = new jsPDF({orientation: 'landscape',});
+        // src: https://stackoverflow.com/questions/48471887/how-to-set-size-of-rendered-image
+        html2canvas(document.querySelector("#capture"), { width: 1200, height: 1100, useCORS: true })
+        .then(canvas => {
+            //document.body.appendChild(canvas);  // if you want see your screenshot in body.
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            const pdf = new jsPDF('l', 'pt', "a4");
+            //pdf.addImage(imgData, 'JPEG', 0, -80);
+            //pdf.save("download.pdf");
+            const ratio = canvas.height / canvas.width;
+
+            //const pdf = new jsPDF("l");
             const imgProps= pdf.getImageProperties(imgData);
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
-            pdf.save("download.pdf"); 
+            pdf.addImage(imgData, 'PNG', 10, -160, pdfWidth, pdfHeight);
+            pdf.save('download.pdf');
        });
    
     }
@@ -195,7 +201,7 @@ class QueryDetails extends Component{
         reader.onloadend = () => {
           this.setState({
             file: file,
-            imagePreviewUrl: reader.result
+            imagePreviewUrl: reader.result.replace('text/xml', 'image/png')
           });
         }
     
@@ -210,7 +216,7 @@ class QueryDetails extends Component{
         let {imagePreviewUrl} = this.state;
         let $imagePreview = null;
         if (imagePreviewUrl) {
-            $imagePreview = (<img src={imagePreviewUrl} />);
+            $imagePreview = (<Image src={imagePreviewUrl} />);
         } else {
             $imagePreview = (<div className="previewText">Please select an Image for Preview</div>);
         }
@@ -219,6 +225,7 @@ class QueryDetails extends Component{
             <Form>
                 <br />
                 <div id = "capture">
+                    <h1 className="ui centered">ใบลาย</h1>
                     {options.map((val, index) =>
                         <Form.Group widths='equal'>
                             <Form.Input fluid label='Brand' value={val.brand} />
@@ -234,11 +241,13 @@ class QueryDetails extends Component{
                         </Form.Group>
                     )}
 
-                    <input className="fileInput" 
-                        type="file" 
-                        onChange={(e)=>this._handleImageChange(e)} />
-                    <div className="imgPreview">
-                        {$imagePreview}
+                    <div id="imgInput">
+                        <input className="fileInput" 
+                            type="file" 
+                            onChange={(e)=>this._handleImageChange(e)} />                
+                        <div className="imgPreview">
+                            {$imagePreview}
+                        </div>
                     </div>
                 </div>
 
